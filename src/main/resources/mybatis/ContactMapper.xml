@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.ContactDao" >
+  <resultMap id="BaseResultMap" type="com.domain.Contact" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="qq" property="qq" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="wechat" property="wechat" jdbcType="VARCHAR" />
+    <result column="qr" property="qr" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="base_columns" >
+    id, qq, phone, wechat, qr, address, name
+  </sql>
+  
+  <insert id="insert" parameterType="com.domain.Contact" >
+    insert into contact (qq, phone,  wechat, qr, address, name)
+    values (#{qq,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, 
+      #{wechat,jdbcType=VARCHAR}, #{qr,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR})
+  </insert>
+  
+  <select id="selectOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="base_columns" />
+    from contact
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <update id="update" parameterType="com.domain.Contact" >
+    update contact
+    <set>
+        qq = #{qq,jdbcType=VARCHAR},
+        phone = #{phone,jdbcType=VARCHAR},
+        wechat = #{wechat,jdbcType=VARCHAR},
+        qr = #{qr,jdbcType=VARCHAR},
+      	address = #{address,jdbcType=VARCHAR},
+        name = #{name,jdbcType=VARCHAR}
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from contact
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  
+  <select id="selectAllList" resultMap="BaseResultMap" parameterType="java.util.Map">
+	select <include refid="base_columns" />  from  contact
+	<where>
+       <if test="name != null" >
+       		and name like concat('%', #{name}, '%')
+       </if>
+	</where>
+	 
+	 <choose>
+  		<when test="custom_order_sql != null">
+  			order by ${custom_order_sql}
+  		</when>
+  		<otherwise>
+  			order by id desc
+  		</otherwise>
+ 	 </choose>
+  </select>
+  
+</mapper>

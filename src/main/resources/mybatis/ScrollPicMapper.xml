@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.ScrollPicDao" >
+  <resultMap id="BaseResultMap" type="com.domain.ScrollPic" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="pic" property="pic" jdbcType="VARCHAR" />
+    <result column="sort_num" property="sortNum" jdbcType="INTEGER" />
+    <result column="info" property="info" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="is_delete" property="isDelete" jdbcType="CHAR" />
+    <result column="delete_time" property="deleteTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  
+  <sql id="base_columns" >
+    id, pic, sort_num, info, create_time, is_delete, delete_time
+  </sql>
+  
+  <insert id="insert" parameterType="com.domain.ScrollPic" >
+    insert into scroll_pic (pic, sort_num, info, create_time)
+    values (#{pic,jdbcType=VARCHAR}, #{sortNum,jdbcType=INTEGER}, #{info,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  
+  <select id="selectOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="base_columns" />
+    from scroll_pic
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <update id="update" parameterType="com.domain.ScrollPic" >
+    update scroll_pic
+    <set >
+      <if test="pic != null" >
+        pic = #{pic,jdbcType=VARCHAR},
+      </if>
+      <if test="sortNum != null" >
+        sort_num = #{sortNum,jdbcType=INTEGER},
+      </if>
+      <if test="info != null" >
+        info = #{info,jdbcType=VARCHAR},
+      </if>
+      <if test="isDelete != null" >
+         is_delete = #{isDelete},
+      </if>
+       <if test="deleteTime != null" >
+         delete_time = #{deleteTime}
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from scroll_pic
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  
+   <select id="selectAllList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select <include refid="base_columns" />  from  scroll_pic
+		<where>
+	       <if test="isDelete != null" >
+	        	and is_delete = #{isDelete}
+	      </if>
+	      <if test="startCreateTime != null and startCreateTime != ''">  
+		    	and create_time &gt;= #{startCreateTime}
+	      </if>
+	      <if test="endCreateTime != null and endCreateTime != ''">  
+	    		and create_time &lt;= #{endCreateTime}
+	      </if>
+		</where>
+		 
+		 <choose>
+	  		<when test="custom_order_sql != null">
+	  			order by ${custom_order_sql}
+	  		</when>
+	  		<otherwise>
+	  			order by id desc
+	  		</otherwise>
+	 	 </choose>
+	  </select>
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.PayDao" >
+  <resultMap id="BaseResultMap" type="com.domain.Pay" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="price" property="price" jdbcType="DOUBLE" />
+    <result column="date" property="date" jdbcType="DATE" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="is_delete" property="isDelete" jdbcType="CHAR" />
+    <result column="delete_time" property="deleteTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  
+  <sql id="base_columns" >
+    id, content, price, date, create_time, is_delete, delete_time
+  </sql>
+  
+  <insert id="insert" parameterType="com.domain.Pay" >
+    insert into pay (content, price, date, create_time)
+    	values (#{content,jdbcType=VARCHAR}, #{price,jdbcType=DOUBLE}, #{date,jdbcType=DATE}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  
+  <select id="selectOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="base_columns" />
+    from pay
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <update id="update" parameterType="com.domain.Pay" >
+    update pay
+    <set >
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=DOUBLE},
+      </if>
+      <if test="date != null" >
+        date = #{date,jdbcType=DATE},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDelete != null" >
+        is_delete = #{isDelete,jdbcType=CHAR}
+      </if>
+      <if test="deleteTime != null" >
+        delete_time = #{deleteTime,jdbcType=TIMESTAMP}
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from pay
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  
+    <select id="selectAllList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select <include refid="base_columns" />  from  pay
+		<where>
+	      <if test="startCreateTime != null and startCreateTime != ''">  
+		    	and create_time &gt;= #{startCreateTime}
+	      </if>
+	      <if test="endCreateTime != null and endCreateTime != ''">  
+	    	and create_time &lt;= #{endCreateTime}
+	      </if>
+	      <if test="isDelete != null" >
+	        	and is_delete = #{isDelete}
+	      </if>
+		</where>
+		 
+		 <choose>
+	  		<when test="custom_order_sql != null">
+	  			order by ${custom_order_sql}
+	  		</when>
+	  		<otherwise>
+	  			order by id desc
+	  		</otherwise>
+	 	 </choose>
+	  </select>
+  
+</mapper>

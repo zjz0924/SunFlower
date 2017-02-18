@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.OrderDao" >
+  <resultMap id="BaseResultMap" type="com.domain.Order" >
+    <id column="o_id" property="id" jdbcType="BIGINT" />
+    <result column="flower_id" property="flowerId" jdbcType="BIGINT" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="price" property="price" jdbcType="DOUBLE" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="wechat" property="wechat" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="order_num" property="orderNum" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  	<result column="is_delete" property="isDelete" jdbcType="CHAR" />
+    <result column="delete_time" property="deleteTime" jdbcType="TIMESTAMP" />
+    
+  	<association property="flower" javaType="com.domain.Flower">
+    	 <id property="id" column="f_id" />
+    	 <result property="name" column="f_name" />
+    	 <result property="pic" column="pic"/>
+    </association>
+  </resultMap>
+  
+  <resultMap id="StatisticMap" type="com.domain.IncomeStatistic" >
+    <result column="date" property="date" jdbcType="DATE" />
+    <result column="total" property="total" jdbcType="INTEGER" />
+    <result column="total_price" property="totalPrice" jdbcType="DOUBLE" />
+  </resultMap>
+  
+  
+  <resultMap id="StatisticMap1" type="com.domain.Statistic" >
+    <result column="income" property="income" jdbcType="DOUBLE" />
+    <result column="outcome" property="outcome" jdbcType="DOUBLE" />
+  </resultMap>
+  
+  
+  <sql id="base_columns" >
+    o.id o_id, o.flower_id, o.num, o.price, o.name, o.wechat, o.phone, o.address, o.remarks, o.create_time, o.order_num, f.id f_id, f.name f_name, f.pic, o.is_delete,  o.delete_time
+  </sql>
+  
+  <insert id="insert" parameterType="com.domain.Order" >
+    insert into `order` (flower_id, num, price, name, wechat,  phone, address, remarks, create_time, order_num)
+    values (#{flowerId,jdbcType=BIGINT}, #{num,jdbcType=INTEGER}, 
+      #{price,jdbcType=DOUBLE}, #{name,jdbcType=VARCHAR}, #{wechat,jdbcType=VARCHAR}, 
+      #{phone,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{remarks,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{orderNum,jdbcType=VARCHAR})
+  </insert>
+  
+  <select id="selectOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="base_columns" />
+    from `order` o left join flower f on f.id = o.flower_id
+    where o.id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <update id="update" parameterType="com.domain.Order" >
+    update `order`
+    <set >
+      <if test="flowerId != null" >
+        flower_id = #{flowerId,jdbcType=BIGINT},
+      </if>
+      <if test="num != null" >
+        num = #{num,jdbcType=INTEGER},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=DOUBLE},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="wechat != null" >
+        wechat = #{wechat,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks != null" >
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="orderNum != null" >
+        order_num = #{orderNum,jdbcType=VARCHAR},
+      </if>
+       <if test="isDelete != null" >
+        is_delete = #{isDelete,jdbcType=CHAR},
+      </if>
+      <if test="deleteTime != null" >
+        delete_time = #{deleteTime,jdbcType=TIMESTAMP}
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from `order`
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  
+  <select id="selectAllList" resultMap="BaseResultMap" parameterType="java.util.Map">
+	select <include refid="base_columns" />  from  `order` o left join flower f on f.id = o.flower_id
+	<where>
+       <if test="name != null" >
+       		and o.name like concat('%', #{name}, '%')
+       </if>
+       <if test="orderNum != null" >
+       		and order_num = #{orderNum}
+       </if>
+       <if test="phone != null" >
+       		and phone like concat('%', #{phone}, '%')
+       </if>
+      <if test="startCreateTime != null and startCreateTime != ''">  
+	    	and o.create_time &gt;= #{startCreateTime}
+      </if>
+      <if test="endCreateTime != null and endCreateTime != ''">  
+    		and o.create_time &lt;= #{endCreateTime}
+      </if>
+      <if test="wechat != null" >
+       		and wechat like concat('%', #{wechat}, '%')
+       </if>
+      <if test="flowerId != null" >
+           and flower_id = #{flowerId,jdbcType=BIGINT}
+      </if>
+      <if test="isDelete != null" >
+        and o.is_delete = #{isDelete}
+      </if>
+	</where>
+	 
+	 <choose>
+  		<when test="custom_order_sql != null">
+  			order by ${custom_order_sql}
+  		</when>
+  		<otherwise>
+  			order by o.id desc
+  		</otherwise>
+ 	 </choose>
+  </select>
+  
+  
+   <select id="getHotSale" resultType="java.lang.Long" parameterType="java.util.Map">
+  		select flower_id from `order` where is_delete = 'N' group by flower_id ORDER BY count(*) desc limit 0,5
+   </select>
+   
+   
+  <!-- 收入统计 --> 
+  <select id="businessAnalysis" resultMap="StatisticMap" parameterType="java.util.Map">
+	SELECT date_format(create_time, '%Y-%m-%d') date, sum(price) total_price, sum(num) total FROM `order`
+	<where>
+	  and is_delete = 'N'
+	
+      <if test="startCreateTime != null and startCreateTime != ''">  
+	    	and create_time &gt;= #{startCreateTime}
+      </if>
+      <if test="endCreateTime != null and endCreateTime != ''">  
+    		and create_time &lt;= #{endCreateTime}
+      </if>
+	</where>
+	 
+	 GROUP BY date DESC
+  </select>
+  
+  <!-- 营业统计 -->
+  <select id="statistic" resultMap="StatisticMap1" parameterType="java.util.Map">
+  	select a.total income, b.total outcome from 
+		(select sum(price) total from `order` 
+			<where> 
+			   and is_delete= 'N' 
+			  <if test="startCreateTime != null and startCreateTime != ''">  
+			    	and create_time &gt;= #{startCreateTime}
+		      </if>
+		      <if test="endCreateTime != null and endCreateTime != ''">  
+		    		and create_time &lt;= #{endCreateTime}
+		      </if> 
+		    </where>
+		) a, 
+		(select sum(price) total from pay 
+			<where> 
+			  and is_delete = 'N'
+			  
+			  <if test="startCreateTime != null and startCreateTime != ''">  
+			    	and date &gt;= #{startCreateTime}
+		      </if>
+		      <if test="endCreateTime != null and endCreateTime != ''">  
+		    		and date &lt;= #{endCreateTime}
+		      </if> 
+		    </where>
+	    ) b
+  </select>
+  
+</mapper>

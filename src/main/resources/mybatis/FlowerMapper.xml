@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.FlowerDao" >
+  <resultMap id="BaseResultMap" type="com.domain.Flower" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="pic" property="pic" jdbcType="VARCHAR" />
+    <result column="price" property="price" jdbcType="DOUBLE" />
+    <result column="is_display" property="isDisplay" jdbcType="CHAR" />
+    <result column="is_delete" property="isDelete" jdbcType="CHAR" />
+    <result column="delete_time" property="deleteTime" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="descrition" property="descrition" jdbcType="VARCHAR" />
+    <result column="discount" property="discount" jdbcType="VARCHAR" />
+    <result column="dis_price" property="disPrice" jdbcType="DOUBLE" />
+    <result column="language" property="language" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="base_columns" >
+    id, name, pic, price, is_display, is_delete, delete_time, create_time, descrition, discount, dis_price, language
+  </sql>
+  
+  <insert id="insert" parameterType="com.domain.Flower" >
+    insert into flower (name, pic, price, descrition, discount, create_time, dis_price, language)
+    values (#{name,jdbcType=VARCHAR}, #{pic,jdbcType=VARCHAR}, 
+      #{price,jdbcType=DOUBLE}, #{descrition,jdbcType=VARCHAR}, #{discount,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+      #{disPrice,jdbcType=DOUBLE},#{language,jdbcType=VARCHAR})
+  </insert>
+  
+  <select id="selectOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="base_columns" />
+    from flower
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <update id="update" parameterType="com.domain.Flower" >
+    update flower
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="pic != null" >
+        pic = #{pic,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=DOUBLE},
+      </if>
+       <if test="isDelete != null" >
+         is_delete = #{isDelete},
+      </if>
+      <if test="isDisplay != null" >
+         is_display = #{isDisplay},
+      </if>
+      <if test="deleteTime != null" >
+         delete_time = #{deleteTime},
+      </if>
+      
+      discount = #{discount,jdbcType=VARCHAR},
+      dis_price = #{disPrice,jdbcType=DOUBLE},
+      language = #{language,jdbcType=VARCHAR},
+      descrition = #{descrition,jdbcType=VARCHAR}
+    </set>
+    
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from flower
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  
+  <select id="selectAllList" resultMap="BaseResultMap" parameterType="java.util.Map">
+	select <include refid="base_columns" />  from  flower
+	<where>
+       <if test="name != null" >
+       		and name like concat('%', #{name}, '%')
+       </if>
+       <if test="isDelete != null" >
+        	and is_delete = #{isDelete}
+      </if>
+      <if test="isDisplay != null" >
+        	and is_display = #{isDisplay}
+      </if>
+      <if test="startCreateTime != null and startCreateTime != ''">  
+	    	and create_time &gt;= #{startCreateTime}
+      </if>
+      <if test="endCreateTime != null and endCreateTime != ''">  
+    	and create_time &lt;= #{endCreateTime}
+      </if>
+      
+      <if test="idList != null and idList != ''">  
+      	 and id in
+    	<foreach collection="idList" item="id" index="index" separator=","  open= "(" close =")">  
+		 	#{id}        
+	  	</foreach>
+      </if>
+	</where>
+	 
+	 <choose>
+  		<when test="custom_order_sql != null">
+  			order by ${custom_order_sql}
+  		</when>
+  		<otherwise>
+  			order by id desc
+  		</otherwise>
+ 	 </choose>
+  </select>
+  
+</mapper>

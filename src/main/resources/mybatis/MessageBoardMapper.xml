@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.MessageBoardDao" >
+  <resultMap id="BaseResultMap" type="com.domain.MessageBoard" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="is_delete" property="isDelete" jdbcType="CHAR" />
+    <result column="wechat" property="wechat" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="base_columns" >
+    id, name, phone, content, create_time, is_delete, wechat
+  </sql>
+  
+  <insert id="insert" parameterType="com.domain.MessageBoard" >
+    insert into message_board (name, phone, content, create_time, wechat)
+    values (#{name,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{wechat,jdbcType=VARCHAR})
+  </insert>
+  
+  <select id="selectOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="base_columns" />
+    from message_board
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <update id="update" parameterType="com.domain.MessageBoard" >
+    update message_board
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+       <if test="isDelete != null" >
+         is_delete = #{isDelete},
+      </if>
+      <if test="wechat != null" >
+         wechat = #{wechat}
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from message_board
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  
+  <select id="selectAllList" resultMap="BaseResultMap" parameterType="java.util.Map">
+	select <include refid="base_columns" />  from  message_board
+	<where>
+       <if test="name != null" >
+       		and name like concat('%', #{name}, '%')
+       </if>
+         <if test="phone != null" >
+       		and phone like concat('%', #{phone}, '%')
+       </if>
+         <if test="isDelete != null" >
+        	and is_delete = #{isDelete}
+      </if>
+      <if test="startCreateTime != null and startCreateTime != ''">  
+	    	and create_time &gt;= #{startCreateTime}
+      </if>
+      <if test="endCreateTime != null and endCreateTime != ''">  
+    	and create_time &lt;= #{endCreateTime}
+      </if>
+       <if test="wechat != null" >
+       		and wechat like concat('%', #{wechat}, '%')
+       </if>
+	</where>
+	 
+	 <choose>
+  		<when test="custom_order_sql != null">
+  			order by ${custom_order_sql}
+  		</when>
+  		<otherwise>
+  			order by id desc
+  		</otherwise>
+ 	 </choose>
+  </select>
+  
+</mapper>
